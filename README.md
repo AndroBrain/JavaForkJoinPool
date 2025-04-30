@@ -17,6 +17,11 @@ Wynik działania programu aplikacji wizualizowanej:
 
 Wynik działania programu aplikacji konsolowej:
 
+![](src/results/parallelism_vs_time.png)
+![](src/results/steals_vs_parallelism.png)
+![](src/results/time_vs_steals.png)
+
+
 | Threshold | L. wątków roboczych | L. kradzieży zadań | Czas (ms) |
 |-----------|---------------------|--------------------|-----------|
 | 1         | 11                  | 55                 | 4587      |
