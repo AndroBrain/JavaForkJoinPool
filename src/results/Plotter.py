@@ -37,13 +37,11 @@ csv_data = """Threshold,Parallelism,Steals,TimeMillis
 1,128,1312,3968
 """
 
-# Wczytanie danych do DataFrame
 df = pd.read_csv(io.StringIO(csv_data))
 
-# Konwersja kolumny Threshold na typ kategorialny lub string dla lepszego grupowania na wykresie
 df['Threshold'] = df['Threshold'].astype(str)
 
-# Wykres 1: Czas wykonania vs Poziom równoległości dla różnych progów (podobny do przykładu)
+# Wykres: Czas wykonania vs Poziom równoległości dla różnych progów (podobny do przykładu)
 plt.figure(figsize=(12, 6))
 sns.lineplot(data=df, x='Parallelism', y='TimeMillis', hue='Threshold', marker='o')
 plt.title('Parallelism vs time in millis')
@@ -54,7 +52,7 @@ plt.xscale('log', base=2) # Skala logarytmiczna dla lepszego rozłożenia punkt�
 plt.xticks([1, 2, 4, 8, 16, 32, 64, 128], labels=[1, 2, 4, 8, 16, 32, 64, 128]) # Ustawienie konkretnych znaczników
 plt.show()
 
-# Wykres 2: Liczba "Steals" vs Poziom równoległości dla różnych progów
+# Wykres: Liczba "Steals" vs Poziom równoległości dla różnych progów
 plt.figure(figsize=(12, 6))
 sns.lineplot(data=df, x='Parallelism', y='Steals', hue='Threshold', marker='o')
 plt.title('Steals vs Parallelism')
@@ -65,8 +63,7 @@ plt.xscale('log', base=2) # Skala logarytmiczna dla lepszego rozłożenia punkt�
 plt.xticks([1, 2, 4, 8, 16, 32, 64, 128], labels=[1, 2, 4, 8, 16, 32, 64, 128]) # Ustawienie konkretnych znaczników
 plt.show()
 
-# Wykres 3: Czas wykonania vs Liczba "Steals" dla różnych progów
-# Ten wykres może być mniej czytelny, ale pokazuje potencjalną korelację
+# Wykres: Czas wykonania vs Liczba "Steals" dla różnych progów
 plt.figure(figsize=(12, 6))
 sns.lineplot(data=df, x='Steals', y='TimeMillis', hue='Threshold', marker='o') # Używamy scatterplot dla punktów
 plt.title('Time in millis vs steals')
