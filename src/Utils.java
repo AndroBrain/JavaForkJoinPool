@@ -2,7 +2,7 @@ import java.awt.*;
 import java.util.Random;
 
 public class Utils {
-    public static int THRESHOLD = 100;
+    public static int THRESHOLD = 1;
     public static final Random random = new Random();
 
     public static int[] createRandomArray(int size) {
