@@ -1,4 +1,3 @@
-
 import java.util.Arrays;
 import java.util.concurrent.ForkJoinPool;
 
@@ -27,7 +26,7 @@ public class MainConsole {
     }
 
     private static void sortInPool(int[] array, ForkJoinPool pool) {
-        MergeSortTask sortTask = new MergeSortTask(array);
+        MergeSortTaskConsole sortTask = new MergeSortTaskConsole(array);
         long start = System.currentTimeMillis();
         pool.invoke(sortTask);
         long end = System.currentTimeMillis();

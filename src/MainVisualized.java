@@ -8,7 +8,7 @@ import java.util.Random;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveAction;
 
-public class ParallelMergeSortVisualized {
+public class MainVisualized {
     private static MergeSortVisualizer visualizer;
     private static final Random random = new Random();
     private static int counter = 0;
@@ -16,7 +16,7 @@ public class ParallelMergeSortVisualized {
     private static final Map<Integer, MergeStep> steps = new HashMap<>();
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(ParallelMergeSortVisualized::createAndShowGUI);
+        SwingUtilities.invokeLater(MainVisualized::createAndShowGUI);
     }
 
     private static void createAndShowGUI() {
@@ -64,7 +64,7 @@ public class ParallelMergeSortVisualized {
     }
 
     private static void sortInPool(int[] array, ForkJoinPool pool) {
-        MergeSortTask sortTask = new MergeSortTask(array);
+        MergeSortTaskWithVisualization sortTask = new MergeSortTaskWithVisualization(array);
         long start = System.currentTimeMillis();
         pool.invoke(sortTask);
         long end = System.currentTimeMillis();
@@ -89,23 +89,22 @@ public class ParallelMergeSortVisualized {
         }
     }
 
-    static class MergeSortTask extends RecursiveAction {
+    static class MergeSortTaskWithVisualization extends RecursiveAction {
         private final int[] array;
         private final int start;
         private final int end;
-        private static final int THRESHOLD = 1;
         private final Color taskColor;
         private final int taskId;
 
-        public MergeSortTask(int[] array) {
+        public MergeSortTaskWithVisualization(int[] array) {
             this(array, 0, array.length - 1);
         }
 
-        private MergeSortTask(int[] array, int start, int end) {
+        private MergeSortTaskWithVisualization(int[] array, int start, int end) {
             this.array = array;
             this.start = start;
             this.end = end;
-            this.taskColor = generateRandomColor();
+            this.taskColor = Utils.generateRandomColor();
 
             synchronized (lock) {
                 this.taskId = counter++;
@@ -115,21 +114,13 @@ public class ParallelMergeSortVisualized {
             }
         }
 
-        private Color generateRandomColor() {
-            return new Color(
-                    random.nextInt(200) + 55,
-                    random.nextInt(200) + 55,
-                    random.nextInt(200) + 55
-            );
-        }
-
         @Override
         protected void compute() {
             if (start >= end) {
                 return;
             }
 
-            if (end - start < THRESHOLD) {
+            if (end - start < Utils.THRESHOLD) {
                 Arrays.sort(array, start, end + 1);
                 return;
             }
@@ -137,8 +128,8 @@ public class ParallelMergeSortVisualized {
             int mid = start + (end - start) / 2;
 
             // Create subtasks
-            MergeSortTask leftTask = new MergeSortTask(array, start, mid);
-            MergeSortTask rightTask = new MergeSortTask(array, mid + 1, end);
+            MergeSortTaskWithVisualization leftTask = new MergeSortTaskWithVisualization(array, start, mid);
+            MergeSortTaskWithVisualization rightTask = new MergeSortTaskWithVisualization(array, mid + 1, end);
 
             // Record relationships between tasks
             synchronized (lock) {
@@ -150,11 +141,9 @@ public class ParallelMergeSortVisualized {
                 steps.get(rightTask.taskId).parentIds.add(taskId);
             }
 
-            // Execute subtasks
             invokeAll(leftTask, rightTask);
 
-            // Merge results
-            merge(array, start, mid, end);
+            Utils.merge(array, start, mid, end);
 
             // Record merge step
             synchronized (lock) {
@@ -170,43 +159,6 @@ public class ParallelMergeSortVisualized {
                 Thread.sleep(500); // Pause to show the step
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-            }
-        }
-
-        private void merge(int[] arr, int start, int mid, int end) {
-            int n1 = mid - start + 1;
-            int n2 = end - mid;
-
-            int[] leftArray = new int[n1];
-            int[] rightArray = new int[n2];
-
-            System.arraycopy(arr, start, leftArray, 0, n1);
-            System.arraycopy(arr, mid + 1, rightArray, 0, n2);
-
-            int i = 0, j = 0;
-            int k = start;
-
-            while (i < n1 && j < n2) {
-                if (leftArray[i] <= rightArray[j]) {
-                    arr[k] = leftArray[i];
-                    i++;
-                } else {
-                    arr[k] = rightArray[j];
-                    j++;
-                }
-                k++;
-            }
-
-            while (i < n1) {
-                arr[k] = leftArray[i];
-                i++;
-                k++;
-            }
-
-            while (j < n2) {
-                arr[k] = rightArray[j];
-                j++;
-                k++;
             }
         }
     }

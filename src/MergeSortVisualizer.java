@@ -13,7 +13,7 @@ import java.util.Map;
  */
 public class MergeSortVisualizer extends JPanel {
     private int[] originalArray;
-    private Map<Integer, ParallelMergeSortVisualized.MergeStep> steps = new HashMap<>();
+    private Map<Integer, MainVisualized.MergeStep> steps = new HashMap<>();
     private final Map<Integer, Point> nodePositions = new HashMap<>();
     private boolean showFinalResult = false;
 
@@ -37,8 +37,8 @@ public class MergeSortVisualizer extends JPanel {
         repaint();
     }
 
-    public void updateSteps(Map<Integer, ParallelMergeSortVisualized.MergeStep> steps) {
-        synchronized (ParallelMergeSortVisualized.lock) {
+    public void updateSteps(Map<Integer, MainVisualized.MergeStep> steps) {
+        synchronized (MainVisualized.lock) {
             this.steps = new HashMap<>(steps);
         }
         SwingUtilities.invokeLater(this::repaint);
@@ -90,7 +90,7 @@ public class MergeSortVisualizer extends JPanel {
     }
 
     private int[] findFinalSortedArray() {
-        for (ParallelMergeSortVisualized.MergeStep step : steps.values()) {
+        for (MainVisualized.MergeStep step : steps.values()) {
             if (step.isMerge && step.start == 0 && step.end == originalArray.length - 1) {
                 return step.array;
             }
@@ -146,7 +146,7 @@ public class MergeSortVisualizer extends JPanel {
 
     private List<Integer> findRootTasks() {
         List<Integer> rootTaskIds = new ArrayList<>();
-        for (Map.Entry<Integer, ParallelMergeSortVisualized.MergeStep> entry : steps.entrySet()) {
+        for (Map.Entry<Integer, MainVisualized.MergeStep> entry : steps.entrySet()) {
             if (entry.getKey() >= 0 && entry.getValue().parentIds.isEmpty()) {
                 rootTaskIds.add(entry.getKey());
             }
@@ -156,7 +156,7 @@ public class MergeSortVisualizer extends JPanel {
 
     private List<Integer> findMergeOperations() {
         List<Integer> mergeIds = new ArrayList<>();
-        for (Map.Entry<Integer, ParallelMergeSortVisualized.MergeStep> entry : steps.entrySet()) {
+        for (Map.Entry<Integer, MainVisualized.MergeStep> entry : steps.entrySet()) {
             if (entry.getKey() < 0 && entry.getValue().isMerge) {
                 mergeIds.add(entry.getKey());
             }
@@ -175,7 +175,7 @@ public class MergeSortVisualizer extends JPanel {
 
         // Place merge operations at an appropriate level based on their parent tasks
         for (Integer mergeId : mergeIds) {
-            ParallelMergeSortVisualized.MergeStep mergeStep = steps.get(mergeId);
+            MainVisualized.MergeStep mergeStep = steps.get(mergeId);
 
             if (mergeStep != null && !mergeStep.parentIds.isEmpty()) {
                 // Find the level for this merge based on its parents' level
@@ -211,7 +211,7 @@ public class MergeSortVisualizer extends JPanel {
         // Get all children for the next level
         List<Integer> nextLevelNodes = new ArrayList<>();
         for (int nodeId : currentLevelNodes) {
-            ParallelMergeSortVisualized.MergeStep step = steps.get(nodeId);
+            MainVisualized.MergeStep step = steps.get(nodeId);
             if (step != null) {
                 nextLevelNodes.addAll(step.childIds);
             }
@@ -235,7 +235,7 @@ public class MergeSortVisualizer extends JPanel {
 
             for (int i = 0; i < nodesCount; i++) {
                 int nodeId = levelNodes.get(i);
-                ParallelMergeSortVisualized.MergeStep step = steps.get(nodeId);
+                MainVisualized.MergeStep step = steps.get(nodeId);
                 if (step != null) {
                     int x = startNodeX + i * CELL_WIDTH * 2 + (CELL_WIDTH * step.array.length) / 2;
                     int y = baseY + verticalOffset + 100;  // Apply verticalOffset to prevent overlap
@@ -250,13 +250,13 @@ public class MergeSortVisualizer extends JPanel {
 
     private void drawNodeConnections(Graphics2D g2d) {
         g2d.setStroke(new BasicStroke(1.5f));
-        for (Map.Entry<Integer, ParallelMergeSortVisualized.MergeStep> entry : steps.entrySet()) {
+        for (Map.Entry<Integer, MainVisualized.MergeStep> entry : steps.entrySet()) {
             int nodeId = entry.getKey();
 
             // Skip merge operations (they'll be handled separately)
             if (nodeId < 0) continue;
 
-            ParallelMergeSortVisualized.MergeStep step = entry.getValue();
+            MainVisualized.MergeStep step = entry.getValue();
 
             // Draw connections to parent (regular tasks)
             for (int parentId : step.parentIds) {
@@ -274,13 +274,13 @@ public class MergeSortVisualizer extends JPanel {
     private void drawMergeConnections(Graphics2D g2d) {
         g2d.setStroke(new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 0, new float[]{8}, 0));
 
-        for (Map.Entry<Integer, ParallelMergeSortVisualized.MergeStep> entry : steps.entrySet()) {
+        for (Map.Entry<Integer, MainVisualized.MergeStep> entry : steps.entrySet()) {
             int nodeId = entry.getKey();
 
             // Only process merge operations (negative IDs)
             if (nodeId >= 0) continue;
 
-            ParallelMergeSortVisualized.MergeStep step = entry.getValue();
+            MainVisualized.MergeStep step = entry.getValue();
 
             // Draw dashed connections from parent tasks to merge result
             if (nodePositions.containsKey(nodeId)) {
@@ -306,7 +306,7 @@ public class MergeSortVisualizer extends JPanel {
         for (Map.Entry<Integer, Point> entry : nodePositions.entrySet()) {
             int nodeId = entry.getKey();
             Point position = entry.getValue();
-            ParallelMergeSortVisualized.MergeStep step = steps.get(nodeId);
+            MainVisualized.MergeStep step = steps.get(nodeId);
 
             if (step != null) {
                 // Add visual indicator for merge operations
