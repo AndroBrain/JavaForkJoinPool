@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 import io
 import seaborn as sns
 
-# Dane CSV jako string
 csv_data = """Threshold,Parallelism,Steals,TimeMillis
 100,11,36,3992
 100,12,37,3245
